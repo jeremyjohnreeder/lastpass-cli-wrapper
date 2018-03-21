@@ -1,0 +1,32 @@
+#!/usr/bin/env fish
+set pw_list_file ~/.pw.list
+set i 0
+lpass show -G $argv | egrep ' \[id: \d+\]' | sed 's/\[id: /|/;s/\]$//' | tr '|' '\t' \
+| while read line
+	set i (math $i + 1)
+	echo -e "$i\t$line"
+end | tee $pw_list_file
+set pw_count (wc -l $pw_list_file | egrep -o '\d+')
+set pw_short_id 0
+switch $pw_count
+	case ''
+		echo 'Error processing password list.' ^ /dev/stderr
+		exit 1
+	case 0
+		echo 'No such password.'
+		exit 0
+	case 1
+		set pw_short_id 1
+	case '*'
+		read -P 'Which? ' pw_short_id
+end
+if test $pw_short_id -gt 0 -a $pw_short_id -le $pw_count
+	set pw_long_id (sed -n {$pw_short_id}p $pw_list_file | cut -f 3)
+	for field in url username notes
+		echo -n "$field: "
+		lpass show --$field $pw_long_id
+		or exit 1
+	end
+	lpass show --clip --password $pw_long_id
+	and echo 'password: (copied to clipboard)'
+end
