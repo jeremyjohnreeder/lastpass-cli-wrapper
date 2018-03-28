@@ -1,12 +1,17 @@
 #!/usr/bin/env fish
+
+# Choose 'egrep' for Mac OS, 'grep -P' for Unbuntu.
+set enhanced_grep egrep
+#set enhanced_grep grep -P
+
 set pw_list_file ~/.pw.list
 set i 0
-lpass show -G $argv | egrep ' \[id: \d+\]' | sed 's/\[id: /|/;s/\]$//' | tr '|' '\t' \
+lpass show -G $argv | $enhanced_grep ' \[id: \d+\]' | sed 's/\[id: /|/;s/\]$//' | tr '|' '\t' \
 | while read line
 	set i (math $i + 1)
 	echo -e "$i\t$line"
 end | tee $pw_list_file
-set pw_count (wc -l $pw_list_file | egrep -o '\d+')
+set pw_count (wc -l $pw_list_file | $enhanced_grep -o '\d+')
 set pw_short_id 0
 switch $pw_count
 	case ''
