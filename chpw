@@ -29,11 +29,11 @@ switch $pw_count
 end
 if test $pw_short_id -gt 0 -a $pw_short_id -le $pw_count
 	set pw_long_id (sed -n {$pw_short_id}p $pw_list_file | cut -f 3)
-	for field in url username notes
+	for field in url username notes password
 		echo -n "$field: "
 		lpass show --$field $pw_long_id
 		or exit 1
 	end
-	lpass show --clip --password $pw_long_id
-	and echo 'password: (copied to clipboard)'
+	and lpass generate --clip $pw_long_id 36
+	and echo 'new password: (copied to clipboard)'
 end
